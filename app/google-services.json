@@ -1,34 +1,42 @@
 {
   "project_info": {
-    "project_number": "1025771176734",
-    "firebase_url": "https://uber-192e9-default-rtdb.firebaseio.com",
-    "project_id": "uber-192e9",
-    "storage_bucket": "uber-192e9.appspot.com"
+    "project_number": "1078349747710",
+    "firebase_url": "https://uber-99a43-default-rtdb.firebaseio.com",
+    "project_id": "uber-99a43",
+    "storage_bucket": "uber-99a43.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:1025771176734:android:dacb3cb9c68ef12a923f0f",
+        "mobilesdk_app_id": "1:1078349747710:android:a296b0d85824f5932a1caf",
         "android_client_info": {
           "package_name": "instagram.downloader.com.androiduberremake"
         }
       },
       "oauth_client": [
         {
-          "client_id": "1025771176734-s3qhudjg73demf11ftbprm4kdpkti56v.apps.googleusercontent.com",
+          "client_id": "1078349747710-hqr79fp4aqgn7lfa3tucc5tt9t0nr5cl.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "instagram.downloader.com.androiduberremake",
+            "certificate_hash": "9f649be9669af8f084ca3ef1ea5ef9670a6a593a"
+          }
+        },
+        {
+          "client_id": "1078349747710-k42pek5eqkoclfbf3cle6k6u7a19t0e0.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyCIUyBqYrcCyAwg9NL3uq8io1NA5pdzl20"
+          "current_key": "AIzaSyAStg8Xpk3nadGM3fJmbWhc5kZdf8E927M"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "1025771176734-s3qhudjg73demf11ftbprm4kdpkti56v.apps.googleusercontent.com",
+              "client_id": "1078349747710-k42pek5eqkoclfbf3cle6k6u7a19t0e0.apps.googleusercontent.com",
               "client_type": 3
             }
           ]
