@@ -44,10 +44,17 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
 
-
         <activity
             android:name=".Model.MapsActivity"
             android:label="@string/title_activity_maps" />
+
+        <service android:name=".Services.MyFirebaseMessagingService">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT"/>
+            </intent-filter>
+
+        </service>
+
     </application>
 
 </manifest>

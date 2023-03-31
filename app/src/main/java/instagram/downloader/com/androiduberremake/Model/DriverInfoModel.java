@@ -5,7 +5,7 @@ package instagram.downloader.com.androiduberremake.Model;
  */
 
 public class DriverInfoModel {
-    private String firstName, lastName, phoneNumber;
+    private String firstName, lastName, phoneNumber, avatar;
     private double rating;
 
     public DriverInfoModel() {
@@ -21,6 +21,14 @@ public class DriverInfoModel {
 
     public String getLastName() {
         return lastName;
+    }
+
+    public String getAvatar() {
+        return avatar;
+    }
+
+    public void setAvatar(String avatar) {
+        this.avatar = avatar;
     }
 
     public void setLastName(String lastName) {

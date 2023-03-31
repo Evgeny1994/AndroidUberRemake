@@ -24,6 +24,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.iid.InstanceIdResult;
 
 import java.util.Arrays;
 import java.util.List;
@@ -36,6 +38,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import instagram.downloader.com.androiduberremake.Model.DriverInfoModel;
 
+import instagram.downloader.com.androiduberremake.Utils.UserUtils;
 import io.reactivex.Completable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 
@@ -84,6 +87,24 @@ public class SplashScreenActivity extends AppCompatActivity {
         listener = myFirebaseAuth -> {
             FirebaseUser user = myFirebaseAuth.getCurrentUser();
             if (user != null) {
+                //Update token
+                FirebaseInstanceId.getInstance().getInstanceId()
+                        .addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(Exception e) {
+                                Toast.makeText(SplashScreenActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+                            }
+                        }).addOnSuccessListener(new OnSuccessListener<InstanceIdResult>() {
+                    @Override
+                    public void onSuccess(InstanceIdResult instanceIdResult) {
+                        Log.i("TOKEN", instanceIdResult.getToken());
+                        UserUtils.updateToken(SplashScreenActivity.this, instanceIdResult.getToken());
+                    }
+                });
+
+
+
+
                 checkUserFromFirebase();
             } else {
                 showLoginLayout();
