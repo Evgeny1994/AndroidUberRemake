@@ -74,7 +74,6 @@ import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.core.app.ActivityCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -86,7 +85,6 @@ public class DriverHomeActivity extends AppCompatActivity
     private GoogleMap mMap;
     private DrawerLayout drawer;
     private NavigationView navigationView;
-    private Activity activity;
     //Location
     private FusedLocationProviderClient fusedLocationProviderClient;
     private LocationRequest locationRequest;
@@ -168,20 +166,13 @@ public class DriverHomeActivity extends AppCompatActivity
     }
 
     public void init() {
-            waitingDialog = new AlertDialog.Builder(this)
-                    .setCancelable(false)
-                    .setMessage("Waiting")
-                   .create();
-           storageReference = FirebaseStorage.getInstance().getReference();
-
+        waitingDialog = new AlertDialog.Builder(this)
+                .setCancelable(false)
+                .setMessage("Waiting")
+                .create();
+        storageReference = FirebaseStorage.getInstance().getReference();
 
         onlineRef = FirebaseDatabase.getInstance().getReference().child(".info/connected");
-
-        driverLocationRef = FirebaseDatabase.getInstance().getReference(Common.DRIVER_LOCATION_REFERENCES);
-        currentUserRef = FirebaseDatabase.getInstance().getReference(Common.DRIVER_LOCATION_REFERENCES)
-                .child(FirebaseAuth.getInstance().getCurrentUser().getUid());
-        geoFire = new GeoFire(driverLocationRef);
-        registerOnlineSystem();
 
         locationRequest = new LocationRequest();
         locationRequest.setSmallestDisplacement(10f);
@@ -197,25 +188,55 @@ public class DriverHomeActivity extends AppCompatActivity
                         locationResult.getLastLocation().getLatitude());
                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(newPosition, 18f));
 
-                //Update Location
-                geoFire.setLocation(FirebaseAuth.getInstance().getCurrentUser().getUid(),
-                        new GeoLocation(locationResult.getLastLocation().getLatitude(),
-                                locationResult.getLastLocation().getLongitude()), new GeoFire.CompletionListener() {
+                //Put it here
+                fusedLocationProviderClient.getLastLocation()
+                        .addOnFailureListener(new OnFailureListener() {
                             @Override
-                            public void onComplete(String key, DatabaseError error) {
-                                if (error != null) {
-                                    Snackbar.make(mapFragment.getView(), error.getMessage(), Snackbar.LENGTH_LONG).show();
-                                } else {
-                                    Snackbar.make(mapFragment.getView(), "You're online", Snackbar.LENGTH_LONG).show();
-                                }
+                            public void onFailure(Exception e) {
+
                             }
-                        });
+                        }).addOnSuccessListener(new OnSuccessListener<Location>() {
+                    @Override
+                    public void onSuccess(Location location) {
+                        //Here, after get Location, we will get address name
+                        Geocoder geocoder = new Geocoder(getApplicationContext(), Locale.getDefault());
+                        List<Address> addressList;
 
+                        try {
+                            addressList = geocoder.getFromLocation(locationResult.getLastLocation().getLatitude(), locationResult.getLastLocation().getLongitude(), 1);
+                            String cityName = addressList.get(0).getLocality();
 
+                            driverLocationRef = FirebaseDatabase.getInstance().getReference(Common.DRIVER_LOCATION_REFERENCES)
+                                    .child(cityName);
 
+                            currentUserRef = FirebaseDatabase.getInstance().getReference(Common.DRIVER_LOCATION_REFERENCES)
+                                    .child(FirebaseAuth.getInstance().getCurrentUser().getUid());
 
+                            geoFire = new GeoFire(driverLocationRef);
+
+                            //Update Location
+                            geoFire.setLocation(FirebaseAuth.getInstance().getCurrentUser().getUid(),
+                                    new GeoLocation(locationResult.getLastLocation().getLatitude(),
+                                            locationResult.getLastLocation().getLongitude()), new GeoFire.CompletionListener() {
+                                        @Override
+                                        public void onComplete(String key, DatabaseError error) {
+                                            if (error != null) {
+                                                Snackbar.make(mapFragment.getView(), error.getMessage(), Snackbar.LENGTH_LONG).show();
+                                            } else {
+                                                Snackbar.make(mapFragment.getView(), "You're online", Snackbar.LENGTH_LONG).show();
+                                            }
+                                        }
+                                    });
+                            registerOnlineSystem();  //Only register when we done setup
+
+                        } catch (IOException e) {
+                            Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
             }
         };
+
 
         //FusedLocationProviderClient.getLastLocation()' on a null object reference требуется иниции ровать
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(getApplicationContext());
@@ -457,23 +478,19 @@ public class DriverHomeActivity extends AppCompatActivity
 }
 
 
-
-
-
 //}
 //}
 
 
+//  @Override
+//  public void onPermissionDenied(PermissionDeniedResponse permissionDeniedResponse) {
+//      Toast.makeText(getApplicationContext(), "Permission" + permissionDeniedResponse.getPermissionName() + "" + "was denied", Toast.LENGTH_SHORT).show();
+//   }
 
-  //  @Override
-  //  public void onPermissionDenied(PermissionDeniedResponse permissionDeniedResponse) {
-  //      Toast.makeText(getApplicationContext(), "Permission" + permissionDeniedResponse.getPermissionName() + "" + "was denied", Toast.LENGTH_SHORT).show();
- //   }
+//   @Override
+//   public void onPermissionRationaleShouldBeShown(PermissionRequest permissionRequest, PermissionToken permissionToken) {
 
- //   @Override
- //   public void onPermissionRationaleShouldBeShown(PermissionRequest permissionRequest, PermissionToken permissionToken) {
-
- //   }
+//   }
 //}).check();
 //        try{
 //        boolean success=googleMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(this,R.raw.uber_maps_style));
@@ -484,4 +501,4 @@ public class DriverHomeActivity extends AppCompatActivity
 //        Log.i("EDMT_ERROR",e.getMessage());
 //        }
 //        }
-  //      }
+//      }
