@@ -1,5 +1,6 @@
 package instagram.downloader.com.androiduberremake;
 
+import android.annotation.TargetApi;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -39,37 +40,38 @@ public class Common {
         }
     }
 
-    public static void showNotification(Context context, int id, String title, String body, Intent intent)
-    {
-        PendingIntent pendingIntent = null;
-        if (intent != null)
-        {
-            pendingIntent = PendingIntent.getActivity(context, id, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-            String NOTIFICATION_CHANNEL_ID ="edmt_dev_uber_remake";
-            NotificationManager notificationManager = (NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
-            if (Build.VERSION.SDK_INT>=Build.VERSION_CODES.O)
-            {
-                NotificationChannel notificationChannel = new NotificationChannel(NOTIFICATION_CHANNEL_ID,"Uber Remake", NotificationManager.IMPORTANCE_HIGH);
-                notificationChannel.setDescription("Uber Remake");
-                notificationChannel.enableLights(true);
-                notificationChannel.setLightColor(Color.RED);
-                notificationChannel.setVibrationPattern(new long[]{0, 1000, 500, 1000});
-                notificationChannel.enableLights(true);
-                notificationManager.createNotificationChannel(notificationChannel);
-            }
-            NotificationCompat.Builder builder = new NotificationCompat.Builder(context, NOTIFICATION_CHANNEL_ID);
-            builder.setContentTitle(title)
-                    .setContentText(body)
-                    .setAutoCancel(false)
-                    .setPriority(NotificationCompat.PRIORITY_HIGH)
-                    .setDefaults(Notification.DEFAULT_VIBRATE)
-                    .setSmallIcon(R.drawable.ic_directions_car_black_24dp)
-                    .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_directions_car_black_24dp));
-            if (pendingIntent!=null) {
-                builder.setContentIntent(pendingIntent);
-            }
-            Notification notification = builder.build();
-            notificationManager.notify(id, notification);
-            }
-        }
+//    @TargetApi(Build.VERSION_CODES.O)
+//    public static void showNotification(Context context, int id, String title, String body, Intent intent)
+//    {
+//        PendingIntent pendingIntent = null;
+ //       if (intent != null)
+ //       {
+ //           pendingIntent = PendingIntent.getActivity(context, id, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+ //           String NOTIFICATION_CHANNEL_ID ="edmt_dev_uber_remake";
+ //           NotificationManager notificationManager = (NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
+ //           if (android.os.Build.VERSION.SDK_INT>=Build.VERSION_CODES.ICE_CREAM_SANDWICH)
+ //           {
+ //               NotificationChannel notificationChannel = new NotificationChannel(NOTIFICATION_CHANNEL_ID,"Uber Remake", NotificationManager.IMPORTANCE_HIGH);
+ //               notificationChannel.setDescription("Uber Remake");
+ //               notificationChannel.enableLights(true);
+ //               notificationChannel.setLightColor(Color.RED);
+ //               notificationChannel.setVibrationPattern(new long[]{0, 1000, 500, 1000});
+ //               notificationChannel.enableLights(true);
+ //               notificationManager.createNotificationChannel(notificationChannel);
+ //           }
+ ////           NotificationCompat.Builder builder = new NotificationCompat.Builder(context, NOTIFICATION_CHANNEL_ID);
+ //           builder.setContentTitle(title)
+//                    .setContentText(body)
+//                    .setAutoCancel(false)
+//                    .setPriority(NotificationCompat.PRIORITY_HIGH)
+//                    .setDefaults(Notification.DEFAULT_VIBRATE)
+//                    .setSmallIcon(R.drawable.ic_directions_car_black_24dp)
+//                    .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_directions_car_black_24dp));
+ //           if (pendingIntent!=null) {
+//                builder.setContentIntent(pendingIntent);
+//            }
+//            Notification notification = builder.build();
+//            notificationManager.notify(id, notification);
+//            }
+//        }
     }

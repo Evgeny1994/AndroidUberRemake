@@ -2,9 +2,14 @@ package instagram.downloader.com.androiduberremake;
 
 import android.Manifest;
 import android.app.Activity;
+
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+
 import android.content.res.Resources;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 
 import android.net.Uri;
@@ -15,7 +20,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -25,6 +29,7 @@ import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
+
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
@@ -33,6 +38,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -46,6 +52,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
@@ -57,13 +64,17 @@ import com.karumi.dexter.listener.PermissionGrantedResponse;
 import com.karumi.dexter.listener.PermissionRequest;
 import com.karumi.dexter.listener.single.PermissionListener;
 
+import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -75,6 +86,7 @@ public class DriverHomeActivity extends AppCompatActivity
     private GoogleMap mMap;
     private DrawerLayout drawer;
     private NavigationView navigationView;
+    private Activity activity;
     //Location
     private FusedLocationProviderClient fusedLocationProviderClient;
     private LocationRequest locationRequest;
@@ -92,7 +104,7 @@ public class DriverHomeActivity extends AppCompatActivity
     ValueEventListener onlineValueEventListener = new ValueEventListener() {
         @Override
         public void onDataChange(DataSnapshot dataSnapshot) {
-            if (dataSnapshot.exists()) {
+            if (dataSnapshot.exists() && currentUserRef != null) {
                 currentUserRef.onDisconnect().removeValue();
             }
         }
@@ -156,19 +168,21 @@ public class DriverHomeActivity extends AppCompatActivity
     }
 
     public void init() {
-        waitingDialog = new AlertDialog.Builder(this)
-                .setCancelable(false)
-                .setMessage("Waiting")
-                .create();
-        storageReference = FirebaseStorage.getInstance().getReference();
+            waitingDialog = new AlertDialog.Builder(this)
+                    .setCancelable(false)
+                    .setMessage("Waiting")
+                   .create();
+           storageReference = FirebaseStorage.getInstance().getReference();
 
 
         onlineRef = FirebaseDatabase.getInstance().getReference().child(".info/connected");
+
         driverLocationRef = FirebaseDatabase.getInstance().getReference(Common.DRIVER_LOCATION_REFERENCES);
         currentUserRef = FirebaseDatabase.getInstance().getReference(Common.DRIVER_LOCATION_REFERENCES)
                 .child(FirebaseAuth.getInstance().getCurrentUser().getUid());
         geoFire = new GeoFire(driverLocationRef);
         registerOnlineSystem();
+
         locationRequest = new LocationRequest();
         locationRequest.setSmallestDisplacement(10f);
         locationRequest.setInterval(5000);
@@ -182,6 +196,7 @@ public class DriverHomeActivity extends AppCompatActivity
                 LatLng newPosition = new LatLng(locationResult.getLastLocation().getLatitude(),
                         locationResult.getLastLocation().getLatitude());
                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(newPosition, 18f));
+
                 //Update Location
                 geoFire.setLocation(FirebaseAuth.getInstance().getCurrentUser().getUid(),
                         new GeoLocation(locationResult.getLastLocation().getLatitude(),
@@ -195,11 +210,18 @@ public class DriverHomeActivity extends AppCompatActivity
                                 }
                             }
                         });
+
+
+
+
             }
         };
+
+        //FusedLocationProviderClient.getLastLocation()' on a null object reference требуется иниции ровать
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(getApplicationContext());
         fusedLocationProviderClient.requestLocationUpdates(locationRequest, locationCallback, Looper.myLooper());
     }
+
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -216,7 +238,7 @@ public class DriverHomeActivity extends AppCompatActivity
     private void showDialogUpload() {
         AlertDialog.Builder builder = new AlertDialog.Builder(DriverHomeActivity.this);
         builder.setTitle("Change avatar")
-                .setMessage("Do you really want to vhange avatar")
+                .setMessage("Do you really want to change avatar")
                 .setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
@@ -230,7 +252,7 @@ public class DriverHomeActivity extends AppCompatActivity
                             waitingDialog.setMessage("Uploading.....");
                             waitingDialog.show();
                             String unique_name = FirebaseAuth.getInstance().getCurrentUser().getUid();
-                            StorageReference avatarFolder = storageReference.child("avatar/" + unique_name);
+                            StorageReference avatarFolder = storageReference.child("avatars/" + unique_name);
                             avatarFolder.putFile(imageUri)
                                     .addOnFailureListener(new OnFailureListener() {
                                         @Override
@@ -367,6 +389,7 @@ public class DriverHomeActivity extends AppCompatActivity
         return true;
     }
 
+
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
@@ -402,11 +425,14 @@ public class DriverHomeActivity extends AppCompatActivity
                                 .getParent())
                                 .findViewById(Integer.parseInt("2"));
                         RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) locationButton.getLayoutParams();
-                        //
+                        //Right bottom
                         params.addRule(RelativeLayout.ALIGN_PARENT_TOP, 0);
                         params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
                         params.setMargins(0, 0, 0, 50);
                     }
+
+
+                    //     }
 
                     @Override
                     public void onPermissionDenied(PermissionDeniedResponse permissionDeniedResponse) {
@@ -417,6 +443,7 @@ public class DriverHomeActivity extends AppCompatActivity
                     public void onPermissionRationaleShouldBeShown(PermissionRequest permissionRequest, PermissionToken permissionToken) {
 
                     }
+
                 }).check();
         try {
             boolean success = googleMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(this, R.raw.uber_maps_style));
@@ -428,3 +455,33 @@ public class DriverHomeActivity extends AppCompatActivity
         }
     }
 }
+
+
+
+
+
+//}
+//}
+
+
+
+  //  @Override
+  //  public void onPermissionDenied(PermissionDeniedResponse permissionDeniedResponse) {
+  //      Toast.makeText(getApplicationContext(), "Permission" + permissionDeniedResponse.getPermissionName() + "" + "was denied", Toast.LENGTH_SHORT).show();
+ //   }
+
+ //   @Override
+ //   public void onPermissionRationaleShouldBeShown(PermissionRequest permissionRequest, PermissionToken permissionToken) {
+
+ //   }
+//}).check();
+//        try{
+//        boolean success=googleMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(this,R.raw.uber_maps_style));
+//        if(!success){
+//        Log.i("EDMT_ERROR","Style parsing error");
+//        }
+//        }catch(Resources.NotFoundException e){
+//        Log.i("EDMT_ERROR",e.getMessage());
+//        }
+//        }
+  //      }
